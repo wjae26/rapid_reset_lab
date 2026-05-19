@@ -22,6 +22,7 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
       - ./victim_monitor.py:/root/victim_monitor.py:ro
       - ./client_ip_detector.py:/root/client_ip_detector.py:ro
+      - ./results:/results           # orchestrator reads victim_metrics.json here
     cap_add:
       - NET_ADMIN
     networks:
@@ -31,6 +32,7 @@ services:
       bash -c "
       echo '🛣️ [Victim] 라우팅 추가 (Return path to External Net)...';
       ip route add 192.168.10.0/24 via 192.168.20.40;
+      mkdir -p /results;
       echo '🚀 [Victim] Nginx 시작...';
       nginx -g 'daemon off;'
       "
@@ -123,7 +125,7 @@ services:
       tail -f /dev/null
       "
 
-  # 6. 인라인 IDS 시스템 (Router)
+  # 6. 인라인 IDS/IPS 시스템 (Router)
   ids_ips_vm:
     build:
       context: .
@@ -141,9 +143,8 @@ services:
         ipv4_address: 192.168.20.40
     entrypoint: |
       bash -c "
-      echo '🛣️ [IDS-IPS] IP 포워딩 활성화 (NAT 없음)...';
+      echo '🛣️ [IDS-IPS] IP 포워딩 활성화...';
       sysctl -w net.ipv4.ip_forward=1;
-      
-      echo '✅ [IDS-IPS] 엔진 가동...';
-      tshark -i eth0 -d tcp.port==80,http2 -Nn -l -T fields -e ip.src -e http2.type -E separator=, -Y 'http2 and ip.dst == 192.168.20.10' 2>/dev/null | stdbuf -oL python3 -u /root/detector.py | tee /root/ids.log
+      echo '✅ [IDS-IPS] 준비 완료. IPS 비활성화 상태. Orchestrator가 탐지 엔진을 관리합니다.';
+      tail -f /dev/null
       "

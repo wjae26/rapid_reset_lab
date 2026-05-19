@@ -1,53 +1,64 @@
-import subprocess, sys, re, time
-from collections import defaultdict
+import os
+import sys
+import json
+import signal
+import time
+import psutil
 
-# 실시간 통계 저장
-stats = defaultdict(lambda: {'headers': 0, 'resets': 0})
+# Must match config.py CPU_THRESHOLD
+CPU_THRESHOLD = 70.0
+RESULTS_DIR   = "/results"
+METRICS_FILE  = f"{RESULTS_DIR}/victim_metrics.json"
+SAMPLE_INTERVAL = 1  # seconds
 
-print("📊 [Victim Monitor] Incoming HTTP/2 Rapid Reset Traffic Monitoring...")
-print("서버로 유입되는 HEADERS와 RST_STREAM 패킷을 분석합니다. (Ctrl+C로 종료)")
+samples: list[float] = []
+running = True
 
-# tshark를 사용하여 서버(Port 80)로 들어오는 HTTP/2 패킷 캡처
-cmd = [
-    "tshark", "-i", "any", "-l", "-n",
-    "-d", "tcp.port==80,http2",
-    "-T", "fields",
-    "-e", "ip.src", "-e", "http2.type",
-    "-Y", "http2 and tcp.dstport == 80"
-]
 
-# tshark 실행
-process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+def save_metrics() -> dict:
+    avg = round(sum(samples) / len(samples), 2) if samples else 0.0
+    mx  = round(max(samples), 2) if samples else 0.0
+    data = {
+        "cpu_samples":         samples,
+        "cpu_avg":             avg,
+        "cpu_max":             mx,
+        "threshold_exceeded":  mx >= CPU_THRESHOLD,
+        "sample_count":        len(samples),
+    }
+    with open(METRICS_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+    return data
+
+
+def handle_signal(sig, frame):
+    global running
+    running = False
+
+
+signal.signal(signal.SIGTERM, handle_signal)
+signal.signal(signal.SIGINT,  handle_signal)
+
+os.makedirs(RESULTS_DIR, exist_ok=True)
+
+print(f"📊 [Victim Monitor] CPU 측정 시작 (임계치: {CPU_THRESHOLD}%, 간격: {SAMPLE_INTERVAL}s)")
+print(f"📁 저장 경로: {METRICS_FILE}")
+sys.stdout.flush()
 
 try:
-    for line in process.stdout:
-        line = line.strip()
-        if not line: continue
-        parts = line.split('\t')
-        if len(parts) < 2: continue
-        
-        src_ip = parts[0]
-        types = parts[1].split(',')
-        
-        for t in types:
-            if t == '1': # HEADERS (요청)
-                stats[src_ip]['headers'] += 1
-            elif t == '3': # RST_STREAM (취소)
-                stats[src_ip]['resets'] += 1
-        
-        h = stats[src_ip]['headers']
-        r = stats[src_ip]['resets']
-        
-        # 100개 단위로 통계 출력
-        if h >= 100:
-            rate = (r / h) * 100
-            print(f"📈 [VICTIM VIEW] Attacker: {src_ip} | Total Req: {h} | Resets: {r} | Cancel Rate: {rate:.1f}%")
-            # 누적 통계 초기화 (실시간 변화 확인용)
-            stats[src_ip]['headers'] = 0
-            stats[src_ip]['resets'] = 0
-except KeyboardInterrupt:
-    print("\n👋 모니터링을 종료합니다.")
-    process.terminate()
-except Exception as e:
-    print(f"❌ 오류 발생: {e}")
-    process.terminate()
+    while running:
+        cpu  = psutil.cpu_percent(interval=SAMPLE_INTERVAL)
+        samples.append(cpu)
+        data = save_metrics()
+        flag = "⚠️  OVER" if cpu >= CPU_THRESHOLD else "✅  OK  "
+        print(
+            f"CPU: {cpu:5.1f}% {flag} | "
+            f"Avg: {data['cpu_avg']:5.1f}% | Max: {data['cpu_max']:5.1f}%"
+        )
+        sys.stdout.flush()
+finally:
+    final = save_metrics()
+    print(
+        f"\n📊 [Victim Monitor] 종료 — "
+        f"avg={final['cpu_avg']}%  max={final['cpu_max']}%  "
+        f"exceeded={final['threshold_exceeded']}"
+    )
