@@ -1,0 +1,41 @@
+FROM kalilinux/kali-last-release
+
+# 🌐 미러 사이트 최적화 및 SSL 우회 (kali.sources 파일 수정)
+RUN if [ -f /etc/apt/sources.list.d/kali.sources ]; then \
+        sed -i 's/https/http/g' /etc/apt/sources.list.d/kali.sources; \
+    fi && \
+    echo 'Acquire::https::Verify-Peer "false";' > /etc/apt/apt.conf.d/99verify-peer.conf && \
+    echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99verify-peer.conf && \
+    echo 'Acquire::AllowDowngradeToInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99verify-peer.conf
+
+# 🔄 기본 도구 및 Python 3 설치
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    curl \
+    iproute2 \
+    procps \
+    iptables \
+    tshark \
+    debconf-utils && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 💡 Tshark SUID 설정 (비대화형)
+RUN echo 'wireshark-common wireshark/install-setuid boolean true' | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure wireshark-common
+
+# 🐍 HTTP/2 라이브러리 설치
+RUN pip3 install h2 httpx[http2] --break-system-packages --no-cache-dir
+
+WORKDIR /root
+
+# 📝 Python 스크립트 복사 (손상 방지)
+COPY attacker_multi.py /root/
+COPY attacker_single.py /root/
+COPY detector.py /root/
+COPY ips_blocker.py /root/
+COPY client_traffic.py /root/
+COPY client_advanced.py /root/
+COPY client_burst.py /root/

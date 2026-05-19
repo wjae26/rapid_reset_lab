@@ -1,0 +1,149 @@
+version: '3.8'
+
+networks:
+  external_net:
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+  internal_net:
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
+
+services:
+  # 1. 취약한 대상 웹 서버 (내부망)
+  victim:
+    build:
+      context: .
+      dockerfile: Dockerfile.victim
+    container_name: victim
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./victim_monitor.py:/root/victim_monitor.py:ro
+      - ./client_ip_detector.py:/root/client_ip_detector.py:ro
+    cap_add:
+      - NET_ADMIN
+    networks:
+      internal_net:
+        ipv4_address: 192.168.20.10
+    entrypoint: |
+      bash -c "
+      echo '🛣️ [Victim] 라우팅 추가 (Return path to External Net)...';
+      ip route add 192.168.10.0/24 via 192.168.20.40;
+      echo '🚀 [Victim] Nginx 시작...';
+      nginx -g 'daemon off;'
+      "
+
+  # 2. 정상 사용자 VM (외부망)
+  client_vm:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: client_vm
+    tty: true
+    stdin_open: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      external_net:
+        ipv4_address: 192.168.10.30
+    entrypoint: |
+      bash -c "
+      echo '🛣️ [Client] 라우팅 수정 (Gateway -> IPS)...';
+      ip route del default;
+      ip route add default via 192.168.10.40;
+      echo '✅ [Client] 모든 준비 완료.';
+      tail -f /dev/null
+      "
+
+  # 3. 공격자 컨테이너 1 (192.168.10.20)
+  attacker_vm_1:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: attacker_vm_1
+    tty: true
+    stdin_open: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      external_net:
+        ipv4_address: 192.168.10.20
+    entrypoint: |
+      bash -c "
+      echo '📝 [Attacker 1] 공격 스크립트 로드 완료.';
+      echo '🛣️ [Attacker 1] 라우팅 수정 (Gateway -> IPS)...';
+      while ip route del default; do :; done
+      ip route add default via 192.168.10.40;
+      tail -f /dev/null
+      "
+
+  # 4. 공격자 컨테이너 2 (192.168.10.21)
+  attacker_vm_2:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: attacker_vm_2
+    tty: true
+    stdin_open: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      external_net:
+        ipv4_address: 192.168.10.21
+    entrypoint: |
+      bash -c "
+      echo '📝 [Attacker 2] 공격 스크립트 로드 완료.';
+      echo '🛣️ [Attacker 2] 라우팅 수정 (Gateway -> IPS)...';
+      while ip route del default; do :; done
+      ip route add default via 192.168.10.40;
+      tail -f /dev/null
+      "
+
+  # 5. 공격자 컨테이너 3 (192.168.10.22)
+  attacker_vm_3:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: attacker_vm_3
+    tty: true
+    stdin_open: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      external_net:
+        ipv4_address: 192.168.10.22
+    entrypoint: |
+      bash -c "
+      echo '📝 [Attacker 3] 공격 스크립트 로드 완료.';
+      echo '🛣️ [Attacker 3] 라우팅 수정 (Gateway -> IPS)...';
+      while ip route del default; do :; done
+      ip route add default via 192.168.10.40;
+      tail -f /dev/null
+      "
+
+  # 6. 인라인 IDS 시스템 (Router)
+  ids_ips_vm:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    container_name: ids_ips_vm
+    tty: true
+    stdin_open: true
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    networks:
+      external_net:
+        ipv4_address: 192.168.10.40
+      internal_net:
+        ipv4_address: 192.168.20.40
+    entrypoint: |
+      bash -c "
+      echo '🛣️ [IDS-IPS] IP 포워딩 활성화 (NAT 없음)...';
+      sysctl -w net.ipv4.ip_forward=1;
+      
+      echo '✅ [IDS-IPS] 엔진 가동...';
+      tshark -i eth0 -d tcp.port==80,http2 -Nn -l -T fields -e ip.src -e http2.type -E separator=, -Y 'http2 and ip.dst == 192.168.20.10' 2>/dev/null | stdbuf -oL python3 -u /root/detector.py | tee /root/ids.log
+      "

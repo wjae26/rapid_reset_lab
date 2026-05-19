@@ -1,0 +1,14 @@
+FROM nginx:1.25.2
+
+# 분석에 필요한 도구 설치 (Python, Tshark, iproute2)
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 tshark iproute2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Tshark SUID 설정 (루트 권한 없이 캡처 가능하도록)
+RUN echo 'wireshark-common wireshark/install-setuid boolean true' | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure wireshark-common
+
+WORKDIR /root
+# 모니터링 스크립트는 볼륨을 통해 공유되거나 COPY로 들어갑니다.
