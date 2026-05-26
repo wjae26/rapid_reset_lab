@@ -17,6 +17,8 @@ services:
       context: .
       dockerfile: Dockerfile.victim
     container_name: victim
+    ports:
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro

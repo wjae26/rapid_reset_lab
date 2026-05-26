@@ -1,0 +1,15 @@
+experiment,phase,trial,cancel_rate,rps,duration_sec,ids_alert,ips_blocked,victim_cpu_avg,victim_cpu_max,cpu_threshold_exceeded,timestamp
+2,1,1,0.5,300,15,False,False,45.29,54.9,False,2026-05-26T17:26:35
+2,1,1,0.6,300,15,False,False,44.08,52.2,False,2026-05-26T17:27:08
+2,1,1,0.7,300,15,False,False,44.26,53.4,False,2026-05-26T17:27:41
+2,1,1,0.8,300,15,False,False,44.57,53.6,False,2026-05-26T17:28:15
+2,1,1,0.9,300,15,True,False,46.45,56.1,False,2026-05-26T17:28:48
+2,1,1,1.0,300,15,True,False,46.29,55.4,False,2026-05-26T17:29:22
+2,2,1,0.85,300,15,True,False,45.51,55.6,False,2026-05-26T17:29:55
+2,2,2,0.85,300,15,True,False,45.17,53.7,False,2026-05-26T17:30:29
+2,2,1,0.825,300,15,True,False,45.44,54.4,False,2026-05-26T17:31:02
+2,2,2,0.825,300,15,False,False,48.18,60.6,False,2026-05-26T17:31:36
+2,2,1,0.8125,300,15,True,False,46.74,56.7,False,2026-05-26T17:32:09
+2,2,2,0.8125,300,15,False,False,46.05,55.2,False,2026-05-26T17:32:44
+2,2,1,0.8063,300,15,True,False,46.02,54.8,False,2026-05-26T17:33:17
+2,2,2,0.8063,300,15,False,False,45.11,54.3,False,2026-05-26T17:33:51

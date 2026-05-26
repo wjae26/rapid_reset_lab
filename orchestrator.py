@@ -16,12 +16,17 @@ import sys
 import time
 from datetime import datetime
 
+# Windows cp949 콘솔에서 이모지 출력 시 UnicodeEncodeError 방지
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from config import (
     ATTACKER_CONTAINER, ATTACKER_SCRIPT,
     BINARY_SEARCH_MAX_ITERATIONS, BINARY_SEARCH_PRECISION,
     BINARY_SEARCH_SUCCESS_THRESHOLD, BINARY_SEARCH_TRIALS,
     CLIENT_CONTAINER, CLIENT_SCRIPT,
     COOLDOWN_BETWEEN_EXPERIMENTS, CPU_TARGET_FOR_EXP2, CPU_THRESHOLD,
+    EXP0_CANCEL_RATE,
     EXP1_CANCEL_RATE, EXP1_COLUMNS, EXP1_CSV, EXP1_RPS_VALUES,
     EXP2_CANCEL_RATE_RANGE, EXP2_CANCEL_RATE_STEP, EXP2_COLUMNS, EXP2_CSV, EXP2_RPS,
     EXP3_COLUMNS, EXP3_CSV,
@@ -199,6 +204,7 @@ def _cooldown():
 
 def _print_timing():
     per_run   = EXPERIMENT_DURATION + COOLDOWN_BETWEEN_EXPERIMENTS
+    exp0_runs = len(EXP1_RPS_VALUES)   # baseline: same RPS list
     exp1_runs = len(EXP1_RPS_VALUES)
     exp2_scan = round((EXP2_CANCEL_RATE_RANGE[1] - EXP2_CANCEL_RATE_RANGE[0])
                       / EXP2_CANCEL_RATE_STEP) + 1
@@ -206,18 +212,21 @@ def _print_timing():
     exp2_runs = exp2_scan + exp2_bs
     exp3_runs = exp2_scan
 
-    # 각 run의 실제 소요: duration + cooldown + setup 오버헤드(tshark 워밍업 등 ~4s)
-    overhead  = 4
+    overhead       = 4
     per_run_actual = per_run + overhead
 
+    t0 = exp0_runs * per_run_actual
     t1 = exp1_runs * per_run_actual
     t2 = exp2_runs * per_run_actual
     t3 = exp3_runs * per_run_actual
-    total = t1 + t2 + t3
+    total = t0 + t1 + t2 + t3
 
-    sel = EXPERIMENT_SELECT
-    print("\n  ┌─ 예상 소요 시간 ────────────────────────────────")
+    sel  = EXPERIMENT_SELECT
     unit = f"{per_run}s+{overhead}s"
+    print("\n  ┌─ 예상 소요 시간 ────────────────────────────────")
+    if sel in ("0", "1", "all"):
+        print(f"  │  실험 0 (베이스라인):      {exp0_runs:2d}회 × ({unit}) = {t0}s  "
+              f"(~{t0//60}분 {t0%60:02d}초)")
     if sel in ("1", "all"):
         print(f"  │  실험 1 (RPS 스윕):        {exp1_runs:2d}회 × ({unit}) = {t1}s  "
               f"(~{t1//60}분 {t1%60:02d}초)")
@@ -228,7 +237,7 @@ def _print_timing():
         print(f"  │  실험 3 (혼합 트래픽):     {exp3_runs:2d}회 × ({unit}) = {t3}s  "
               f"(~{t3//60}분 {t3%60:02d}초)")
     if sel == "all":
-        total_runs = exp1_runs + exp2_runs + exp3_runs
+        total_runs = exp0_runs + exp1_runs + exp2_runs + exp3_runs
         print(f"  │  전체 합계:          최대 {total_runs:2d}회  "
               f"≈ {total}s (~{total//60}분 {total%60:02d}초)")
     print("  └────────────────────────────────────────────────")
@@ -277,6 +286,35 @@ def single_run(cancel_rate: float, rps: int, with_client: bool = False) -> dict:
         "cpu_threshold_exceeded": exceeded,
         "timestamp":             datetime.now().isoformat(timespec="seconds"),
     }
+
+
+# ── Experiment 0: baseline (cancel_rate=0) ────────────────────────────────────
+
+def experiment_0():
+    """cancel_rate=0으로 순수 HTTP/2 부하 측정. 결과를 EXP1_CSV에 experiment=0으로 기록."""
+    print("\n" + "=" * 66)
+    print("  실험 0 — 베이스라인  (cancel_rate=0, RST_STREAM 없음)")
+    print(f"  RPS: {EXP1_RPS_VALUES}  duration={EXPERIMENT_DURATION}s")
+    print(f"  ※ 결과는 {EXP1_CSV} 에 experiment=0 행으로 저장됩니다.")
+    print("=" * 66)
+
+    for rps in EXP1_RPS_VALUES:
+        print(f"\n  ▶  RPS={rps}  cancel_rate={EXP0_CANCEL_RATE}  [baseline]")
+        m = single_run(EXP0_CANCEL_RATE, rps)
+        row = {
+            "experiment":              0,
+            "rps":                     rps,
+            "cancel_rate":             EXP0_CANCEL_RATE,
+            "duration_sec":            EXPERIMENT_DURATION,
+            **{k: m[k] for k in ("ids_alert", "ips_blocked",
+                                  "victim_cpu_avg", "victim_cpu_max",
+                                  "cpu_threshold_exceeded", "timestamp")},
+        }
+        append_csv(EXP1_CSV, EXP1_COLUMNS, row)
+        _cooldown()
+
+    print(f"\n  실험 0 완료.")
+    print(f"  📁 {EXP1_CSV}")
 
 
 # ── Experiment 1: RPS sweep ────────────────────────────────────────────────────
@@ -459,27 +497,30 @@ def main():
 
     fixed_rps = EXP2_RPS  # default fallback
 
+    if sel in ("0", "1", "all"):
+        experiment_0()
+
     if sel in ("1", "all"):
         fixed_rps = experiment_1()
 
-    if sel in ("2", "all"):
+    if sel in ("2", "23", "all"):
         experiment_2(fixed_rps)
 
-    if sel in ("3", "all"):
+    if sel in ("3", "23", "all"):
         experiment_3(fixed_rps)
 
-    if sel not in ("1", "2", "3", "all"):
+    if sel not in ("0", "1", "2", "3", "23", "all"):
         print(f"  ❌ 알 수 없는 EXPERIMENT_SELECT={sel!r}")
-        print("     config.py에서 '1', '2', '3', 'all' 중 하나로 설정하세요.")
+        print("     config.py에서 '0', '1', '2', '3', '23', 'all' 중 하나로 설정하세요.")
         sys.exit(1)
 
     print("\n" + "=" * 66)
     print("  ✅  모든 실험 완료")
-    if sel in ("1", "all"):
-        print(f"  📁  실험 1: {EXP1_CSV}")
-    if sel in ("2", "all"):
+    if sel in ("0", "1", "all"):
+        print(f"  📁  실험 0/1: {EXP1_CSV}  (experiment=0: 베이스라인, experiment=1: RPS 스윕)")
+    if sel in ("2", "23", "all"):
         print(f"  📁  실험 2: {EXP2_CSV}")
-    if sel in ("3", "all"):
+    if sel in ("3", "23", "all"):
         print(f"  📁  실험 3: {EXP3_CSV}")
     print("=" * 66)
 

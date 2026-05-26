@@ -5,3 +5,9 @@ experiment,cancel_rate,rps,client_active,duration_sec,ids_alert,ips_blocked,vict
 3,0.8,150,True,15,False,False,46.42,62.4,False,2026-05-26T16:44:25
 3,0.9,150,True,15,True,False,47.61,62.7,False,2026-05-26T16:45:00
 3,1.0,150,True,15,True,False,49.32,63.7,False,2026-05-26T16:45:34
+3,0.5,300,True,15,False,False,40.21,52.4,False,2026-05-26T17:34:26
+3,0.6,300,True,15,False,False,41.31,52.4,False,2026-05-26T17:35:01
+3,0.7,300,True,15,False,False,43.57,57.9,False,2026-05-26T17:35:36
+3,0.8,300,True,15,False,False,41.82,54.4,False,2026-05-26T17:36:11
+3,0.9,300,True,15,True,False,42.19,53.6,False,2026-05-26T17:36:46
+3,1.0,300,True,15,True,False,42.88,55.4,False,2026-05-26T17:37:21

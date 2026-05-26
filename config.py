@@ -1,10 +1,14 @@
 # ── Experiment selection ───────────────────────────────────────────────────────
 # "1", "2", "3", or "all"
-EXPERIMENT_SELECT = "all"
+EXPERIMENT_SELECT = "23"
 
 # ── Timing ────────────────────────────────────────────────────────────────────
 EXPERIMENT_DURATION          = 15   # seconds per run
 COOLDOWN_BETWEEN_EXPERIMENTS = 10   # seconds between runs
+
+# ── Experiment 0: baseline (cancel_rate=0, no RST_STREAM) ─────────────────────
+# 동일 RPS에서 순수 HTTP/2 부하만 측정. EXP1_CSV에 experiment=0 행으로 함께 기록.
+EXP0_CANCEL_RATE = 0.0
 
 # ── Experiment 1: RPS sweep (cancel_rate=1.0 fixed) ───────────────────────────
 # --rps N = N threads × 0.001s sleep. 300 threads → CPU ≈ 50-55% (기존 실측 기준)
@@ -17,7 +21,7 @@ EXP1_CSV         = "./results/exp1_rps_sweep.csv"
 EXP2_RPS               = 300
 EXP2_CANCEL_RATE_RANGE = (0.5, 1.0)
 EXP2_CANCEL_RATE_STEP  = 0.1
-EXP2_CSV               = "./results/exp2_cancel_sweep.csv"
+EXP2_CSV               = "./results/exp2_cancel_sweep_r2.csv"
 
 # ── Experiment 3: mixed traffic (exp2 conditions + client_vm normal traffic) ───
 EXP3_CSV      = "./results/exp3_mixed.csv"

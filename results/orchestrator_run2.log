@@ -1,0 +1,239 @@
+==================================================================
+  🚀 HTTP/2 Rapid Reset Orchestrator v2
+    [docker cp attacker_multi.py → attacker_vm_1 ✓]
+     실험 선택: 23  |  duration=15s  cooldown=10s
+     IPS: 비활성화  |  CPU 임계치: 70.0%
+==================================================================
+
+  ┌─ 예상 소요 시간 ────────────────────────────────
+  └────────────────────────────────────────────────
+
+==================================================================
+  실험 2 — cancel_rate 스윕  (RPS=300 고정)
+  cancel_rate: 0.5→1.0  step=0.1  이후 바이너리 서치 (최대 4회)
+==================================================================
+
+  ▶  phase=1  trial=1  cancel_rate=0.5000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.5000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 45.3%  max= 54.9%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=1  trial=1  cancel_rate=0.6000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.6000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 44.1%  max= 52.2%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=1  trial=1  cancel_rate=0.7000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.7000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 44.3%  max= 53.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=1  trial=1  cancel_rate=0.8000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 44.6%  max= 53.6%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=1  trial=1  cancel_rate=0.9000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.9000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 46.5%  max= 56.1%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=1  trial=1  cancel_rate=1.0000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=1.0000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 46.3%  max= 55.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  Phase 1 완료. 탐지된 cancel_rate: [0.9, 1.0]
+
+  Phase 2 — 바이너리 서치  [0.8000, 0.9000]
+
+    [0.8000, 0.9000]  mid=0.8500  iter=1/4  (2회 시도, ≥1회 탐지 시 하향)
+
+  ▶  phase=2  trial=1  cancel_rate=0.8500  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8500  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 45.5%  max= 55.6%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=2  trial=2  cancel_rate=0.8500  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8500  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 45.2%  max= 53.7%
+    → 2/2  하향 ↓
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+    [0.8000, 0.8500]  mid=0.8250  iter=2/4  (2회 시도, ≥1회 탐지 시 하향)
+
+  ▶  phase=2  trial=1  cancel_rate=0.8250  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8250  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 45.4%  max= 54.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=2  trial=2  cancel_rate=0.8250  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8250  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 48.2%  max= 60.6%
+    → 1/2  하향 ↓
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+    [0.8000, 0.8250]  mid=0.8125  iter=3/4  (2회 시도, ≥1회 탐지 시 하향)
+
+  ▶  phase=2  trial=1  cancel_rate=0.8125  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8125  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 46.7%  max= 56.7%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=2  trial=2  cancel_rate=0.8125  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8125  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 46.0%  max= 55.2%
+    → 1/2  하향 ↓
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+    [0.8000, 0.8125]  mid=0.8063  iter=4/4  (2회 시도, ≥1회 탐지 시 하향)
+
+  ▶  phase=2  trial=1  cancel_rate=0.8063  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8063  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 46.0%  max= 54.8%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  phase=2  trial=2  cancel_rate=0.8063  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.8063  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 45.1%  max= 54.3%
+    → 1/2  하향 ↓
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  🎯 MODE A 탐지 임계치: 0.8063  (80.63%)
+  📁 ./results/exp2_cancel_sweep_r2.csv
+
+==================================================================
+  실험 3 — 혼합 트래픽  (RPS=300 + client_vm 정상 트래픽)
+  cancel_rate: 0.5→1.0  step=0.1
+==================================================================
+
+  ▶  cancel_rate=0.50  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=0.5000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ←   IDS=False    CPU avg= 40.2%  max= 52.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  cancel_rate=0.60  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=0.6000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ←   IDS=False    CPU avg= 41.3%  max= 52.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  cancel_rate=0.70  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=0.7000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ←   IDS=False    CPU avg= 43.6%  max= 57.9%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  cancel_rate=0.80  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=0.8000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ←   IDS=False    CPU avg= 41.8%  max= 54.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  cancel_rate=0.90  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=0.9000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ← 🚨IDS=True     CPU avg= 42.2%  max= 53.6%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  cancel_rate=1.00  RPS=300  +client_vm
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [client_vm 정상 트래픽 시작]
+    [attack  cancel_rate=1.0000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+    [client_vm 트래픽 종료]
+  ← 🚨IDS=True     CPU avg= 42.9%  max= 55.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  실험 3 완료.
+  📁 ./results/exp3_mixed.csv
+
+==================================================================
+  ✅  모든 실험 완료
+  📁  실험 2: ./results/exp2_cancel_sweep_r2.csv
+  📁  실험 3: ./results/exp3_mixed.csv
+==================================================================

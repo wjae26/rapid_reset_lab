@@ -1,0 +1,138 @@
+==================================================================
+  🚀 HTTP/2 Rapid Reset Orchestrator v2
+    [docker cp attacker_multi.py → attacker_vm_1 ✓]
+     실험 선택: all  |  duration=15s  cooldown=10s
+     IPS: 비활성화  |  CPU 임계치: 70.0%
+==================================================================
+
+  ┌─ 예상 소요 시간 ────────────────────────────────
+  │  실험 0 (베이스라인):       4회 × (25s+4s) = 116s  (~1분 56초)
+  │  실험 1 (RPS 스윕):         4회 × (25s+4s) = 116s  (~1분 56초)
+  │  실험 2 (cancel 스윕):  최대 14회 × (25s+4s) = 406s  (~6분 46초)
+  │  실험 3 (혼합 트래픽):      6회 × (25s+4s) = 174s  (~2분 54초)
+  │  전체 합계:          최대 28회  ≈ 812s (~13분 32초)
+  └────────────────────────────────────────────────
+
+==================================================================
+  실험 0 — 베이스라인  (cancel_rate=0, RST_STREAM 없음)
+  RPS: [50, 150, 250, 300]  duration=15s
+  ※ 결과는 ./results/exp1_rps_sweep.csv 에 experiment=0 행으로 저장됩니다.
+==================================================================
+
+  ▶  RPS=50  cancel_rate=0.0  [baseline]
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.0000  rps=50  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 21.8%  max= 42.4%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=150  cancel_rate=0.0  [baseline]
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.0000  rps=150  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 31.0%  max= 46.3%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=250  cancel_rate=0.0  [baseline]
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.0000  rps=250  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 35.0%  max= 44.1%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=300  cancel_rate=0.0  [baseline]
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.0000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 37.7%  max= 47.2%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  실험 0 완료.
+  📁 ./results/exp1_rps_sweep.csv
+
+==================================================================
+  실험 1 — RPS 스윕  (cancel_rate=1.0 고정, CPU 기준선 확보)
+  RPS: [50, 150, 250, 300]  duration=15s
+==================================================================
+
+  ▶  RPS=50  cancel_rate=1.0
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=1.0000  rps=50  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 35.8%  max= 45.0%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=150  cancel_rate=1.0
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=1.0000  rps=150  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 42.1%  max= 50.9%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=250  cancel_rate=1.0
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=1.0000  rps=250  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 44.8%  max= 53.7%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  ▶  RPS=300  cancel_rate=1.0
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=1.0000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ← 🚨IDS=True     CPU avg= 48.2%  max= 59.6%
+  cooldown       1/10s      2/10s      3/10s      4/10s      5/10s      6/10s      7/10s      8/10s      9/10s     10/10s
+
+  실험 1 완료. CPU 결과:
+    RPS=  50  CPU avg= 35.8%
+    RPS= 150  CPU avg= 42.1%
+    RPS= 250  CPU avg= 44.8%
+    RPS= 300  CPU avg= 48.2% ←
+
+  🎯 실험 2/3 고정 RPS: 300  (CPU≈50% 기준)
+  📁 ./results/exp1_rps_sweep.csv
+
+==================================================================
+  실험 2 — cancel_rate 스윕  (RPS=300 고정)
+  cancel_rate: 0.5→1.0  step=0.1  이후 바이너리 서치 (최대 4회)
+==================================================================
+
+  ▶  phase=1  trial=1  cancel_rate=0.5000  RPS=300
+    [iptables FORWARD cleared]
+    [ids_a.log cleared]
+    [detector MODE A started]
+    [attack  cancel_rate=0.5000  rps=300  duration=15s]
+    attack   1/15s    attack   2/15s    attack   3/15s    attack   4/15s    attack   5/15s    attack   6/15s    attack   7/15s    attack   8/15s    attack   9/15s    attack  10/15s    attack  11/15s    attack  12/15s    attack  13/15s    attack  14/15s    attack  15/15s
+  ←   IDS=False    CPU avg= 43.6%  max= 53.5%
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\rapid_reset_lab\orchestrator.py", line 529, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\admin\Desktop\rapid_reset_lab\orchestrator.py", line 507, in main
+    experiment_2(fixed_rps)
+    ~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\rapid_reset_lab\orchestrator.py", line 398, in experiment_2
+    row = _exp2_run(phase=1, trial=1, cancel_rate=cr, rps=fixed_rps)
+  File "C:\Users\admin\Desktop\rapid_reset_lab\orchestrator.py", line 384, in _exp2_run
+    append_csv(EXP2_CSV, EXP2_COLUMNS, row)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\rapid_reset_lab\orchestrator.py", line 179, in append_csv
+    with open(path, "a", newline="", encoding="utf-8") as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: './results/exp2_cancel_sweep.csv'

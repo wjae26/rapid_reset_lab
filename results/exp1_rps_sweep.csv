@@ -3,3 +3,11 @@ experiment,rps,cancel_rate,duration_sec,ids_alert,ips_blocked,victim_cpu_avg,vic
 1,150,1.0,15,True,False,52.64,62.3,False,2026-05-26T16:33:18
 1,250,1.0,15,True,False,54.64,64.5,False,2026-05-26T16:33:51
 1,300,1.0,15,True,False,55.34,65.0,False,2026-05-26T16:34:24
+0,50,0.0,15,False,False,21.75,42.4,False,2026-05-26T17:19:06
+0,150,0.0,15,False,False,31.0,46.3,False,2026-05-26T17:19:40
+0,250,0.0,15,False,False,34.97,44.1,False,2026-05-26T17:20:13
+0,300,0.0,15,False,False,37.72,47.2,False,2026-05-26T17:20:46
+1,50,1.0,15,True,False,35.82,45.0,False,2026-05-26T17:21:19
+1,150,1.0,15,True,False,42.15,50.9,False,2026-05-26T17:21:52
+1,250,1.0,15,True,False,44.78,53.7,False,2026-05-26T17:22:26
+1,300,1.0,15,True,False,48.21,59.6,False,2026-05-26T17:22:59

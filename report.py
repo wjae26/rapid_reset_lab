@@ -1,15 +1,16 @@
 """
 report.py — Experiment result visualiser
 =========================================
-Reads experiment_log.csv and prints:
+Reads experiment_log.csv (legacy) and exp1_rps_sweep.csv and prints:
+  0. Baseline vs Attack comparison  (exp1_rps_sweep.csv, experiment 0 vs 1)
   1. Phase 1 summary table (MODE A vs B per cancel_rate)
   2. Phase 2 binary search walkthrough (MODE A)
   3. MODE A vs MODE B sensitivity comparison
   4. CPU interpretation with action hint
 
 Usage:
-  python report.py                         # reads default path from config.py
-  python report.py results/custom.csv      # explicit path
+  python report.py                         # reads default paths from config.py
+  python report.py results/custom.csv      # explicit legacy-log path
 """
 
 import csv
@@ -20,6 +21,7 @@ from collections import defaultdict
 from config import (
     BINARY_SEARCH_SUCCESS_THRESHOLD, BINARY_SEARCH_TRIALS,
     CANCEL_RATE_STEP, CPU_THRESHOLD, EXPERIMENT_LOG,
+    EXP1_CSV,
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -45,6 +47,87 @@ def _load(path: str) -> list:
 
 def _sep(char="=", width=70):
     print(char * width)
+
+
+# ── Section 0: Baseline vs Attack comparison ──────────────────────────────────
+
+def print_baseline_comparison():
+    """exp1_rps_sweep.csv 에서 experiment=0(베이스라인)과 experiment=1(공격)을 RPS별로 비교."""
+    if not os.path.exists(EXP1_CSV):
+        print(f"  exp1_rps_sweep.csv 없음 — orchestrator를 먼저 실행하세요.\n")
+        return
+
+    with open(EXP1_CSV, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    baseline = {int(r["rps"]): r for r in rows if str(r.get("experiment", "")) == "0"}
+    attack   = {int(r["rps"]): r for r in rows if str(r.get("experiment", "")) == "1"}
+
+    if not baseline and not attack:
+        print("  exp1_rps_sweep.csv에 데이터가 없습니다.\n")
+        return
+
+    all_rps = sorted(set(baseline) | set(attack))
+
+    _sep()
+    print("  실험 0 vs 실험 1 — 베이스라인(cancel_rate=0) vs 공격(cancel_rate=1.0)")
+    _sep()
+    header = (
+        f"  {'RPS':>5}  "
+        f"{'[베이스라인] CPU avg':>20}  {'CPU max':>8}  {'IDS':>7}  "
+        f"{'[공격] CPU avg':>15}  {'CPU max':>8}  {'IDS':>7}  "
+        f"{'CPU 증가':>8}"
+    )
+    print(header)
+    print("  " + "-" * 90)
+
+    for rps in all_rps:
+        b = baseline.get(rps)
+        a = attack.get(rps)
+
+        b_avg = _fv(b["victim_cpu_avg"]) if b else None
+        b_max = _fv(b["victim_cpu_max"]) if b else None
+        b_ids = _bv(b["ids_alert"])      if b else None
+
+        a_avg = _fv(a["victim_cpu_avg"]) if a else None
+        a_max = _fv(a["victim_cpu_max"]) if a else None
+        a_ids = _bv(a["ids_alert"])      if a else None
+
+        b_avg_s = f"{b_avg:6.1f}%" if b_avg is not None else "   N/A "
+        b_max_s = f"{b_max:6.1f}%" if b_max is not None else "   N/A "
+        b_ids_s = ("🚨 True " if b_ids else "  False") if b_ids is not None else "    N/A"
+
+        a_avg_s = f"{a_avg:6.1f}%" if a_avg is not None else "   N/A "
+        a_max_s = f"{a_max:6.1f}%" if a_max is not None else "   N/A "
+        a_ids_s = ("🚨 True " if a_ids else "  False") if a_ids is not None else "    N/A"
+
+        if b_avg is not None and a_avg is not None:
+            delta     = a_avg - b_avg
+            delta_s   = f"+{delta:5.1f}%" if delta >= 0 else f"{delta:6.1f}%"
+            cpu_flag  = " ⚠️" if (a_max or 0) >= CPU_THRESHOLD else "  "
+        else:
+            delta_s  = "    N/A"
+            cpu_flag = "  "
+
+        print(
+            f"  {rps:>5}  "
+            f"{b_avg_s:>20}  {b_max_s:>8}  {b_ids_s:>7}  "
+            f"{a_avg_s:>15}  {a_max_s:>8}  {a_ids_s:>7}  "
+            f"{delta_s:>8}{cpu_flag}"
+        )
+
+    print()
+    # 요약 해석
+    pairs = [(rps, baseline[rps], attack[rps])
+             for rps in all_rps if rps in baseline and rps in attack]
+    if pairs:
+        max_delta_rps, _, _ = max(pairs, key=lambda t: _fv(t[2]["victim_cpu_avg"]) - _fv(t[1]["victim_cpu_avg"]))
+        b_ref = _fv(baseline[max_delta_rps]["victim_cpu_avg"])
+        a_ref = _fv(attack[max_delta_rps]["victim_cpu_avg"])
+        print(f"  → CPU 증가 최대 지점: RPS={max_delta_rps}  "
+              f"베이스라인 {b_ref:.1f}% → 공격 {a_ref:.1f}%  "
+              f"(+{a_ref - b_ref:.1f}%p)")
+    print()
 
 
 # ── Section 1: Phase 1 table ───────────────────────────────────────────────────
@@ -242,6 +325,7 @@ def main():
     print(f"  source: {path}  ({len(rows)} rows)")
     _sep("█")
 
+    print_baseline_comparison()
     print_phase1_table(rows)
     print_phase2_walkthrough(rows)
     print_mode_comparison(rows)
