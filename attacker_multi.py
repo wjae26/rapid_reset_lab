@@ -28,10 +28,10 @@ args = parser.parse_args()
 CANCEL_RATE = args.cancel_rate
 end_time    = time.time() + args.duration if args.duration else None
 
-# RPS control: thread_count × (1 / sleep) = total rps
+# --rps N = N개 스레드, sleep 0.001s 유지 (스레드 수로 강도 조절)
 if args.rps is not None:
-    THREAD_COUNT    = min(args.rps, 300)
-    SLEEP_INTERVAL  = THREAD_COUNT / args.rps   # = 1.0 when rps ≤ 300
+    THREAD_COUNT   = args.rps
+    SLEEP_INTERVAL = 0.001
 else:
     THREAD_COUNT   = 300
     SLEEP_INTERVAL = 0.001
@@ -69,10 +69,8 @@ def attack_worker(worker_id: int):
             time.sleep(0.5)
 
 
-rps_label = f"{args.rps} RPS" if args.rps else "max rate"
 print(
     f"🔥 [Attacker] {THREAD_COUNT} threads  cancel_rate={CANCEL_RATE*100:.1f}%"
-    f"  {rps_label}"
     + (f"  duration={args.duration}s" if args.duration else "  duration=∞")
 )
 sys.stdout.flush()

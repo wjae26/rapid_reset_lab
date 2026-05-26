@@ -7,13 +7,14 @@ EXPERIMENT_DURATION          = 15   # seconds per run
 COOLDOWN_BETWEEN_EXPERIMENTS = 10   # seconds between runs
 
 # ── Experiment 1: RPS sweep (cancel_rate=1.0 fixed) ───────────────────────────
-EXP1_RPS_VALUES  = [10, 50, 100, 200]
+# --rps N = N threads × 0.001s sleep. 300 threads → CPU ≈ 50-55% (기존 실측 기준)
+EXP1_RPS_VALUES  = [50, 150, 250, 300]
 EXP1_CANCEL_RATE = 1.0
 EXP1_CSV         = "./results/exp1_rps_sweep.csv"
 
 # ── Experiment 2: cancel_rate sweep (fixed RPS from exp1) ─────────────────────
 # Auto-detected from exp1 (CPU ≈ 50%). Set manually when running exp2 standalone.
-EXP2_RPS               = 100
+EXP2_RPS               = 300
 EXP2_CANCEL_RATE_RANGE = (0.5, 1.0)
 EXP2_CANCEL_RATE_STEP  = 0.1
 EXP2_CSV               = "./results/exp2_cancel_sweep.csv"

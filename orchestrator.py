@@ -32,6 +32,23 @@ from config import (
 )
 
 
+# ── Script sync ───────────────────────────────────────────────────────────────
+
+def sync_attacker_script():
+    """docker cp로 호스트의 attacker_multi.py를 컨테이너에 복사.
+    이미지 재빌드 없이 --rps 등 최신 변경사항을 반영한다."""
+    src = os.path.abspath(ATTACKER_SCRIPT)
+    dst = f"{ATTACKER_CONTAINER}:/root/{ATTACKER_SCRIPT}"
+    r = subprocess.run(
+        ["docker", "cp", src, dst],
+        capture_output=True, encoding="utf-8",
+    )
+    if r.returncode != 0:
+        print(f"  ❌ {ATTACKER_SCRIPT} 동기화 실패: {r.stderr.strip()}")
+        sys.exit(1)
+    print(f"    [docker cp {ATTACKER_SCRIPT} → {ATTACKER_CONTAINER} ✓]")
+
+
 # ── Docker helper ──────────────────────────────────────────────────────────────
 
 def docker_exec(container: str, cmd: str, detach: bool = False) -> str:
@@ -187,27 +204,33 @@ def _print_timing():
                       / EXP2_CANCEL_RATE_STEP) + 1
     exp2_bs   = BINARY_SEARCH_MAX_ITERATIONS * BINARY_SEARCH_TRIALS
     exp2_runs = exp2_scan + exp2_bs
-    exp3_runs = exp2_scan  # same cancel_rate points
+    exp3_runs = exp2_scan
 
-    t1 = exp1_runs * per_run
-    t2 = exp2_runs * per_run
-    t3 = exp3_runs * per_run
+    # 각 run의 실제 소요: duration + cooldown + setup 오버헤드(tshark 워밍업 등 ~4s)
+    overhead  = 4
+    per_run_actual = per_run + overhead
+
+    t1 = exp1_runs * per_run_actual
+    t2 = exp2_runs * per_run_actual
+    t3 = exp3_runs * per_run_actual
     total = t1 + t2 + t3
 
     sel = EXPERIMENT_SELECT
     print("\n  ┌─ 예상 소요 시간 ────────────────────────────────")
+    unit = f"{per_run}s+{overhead}s"
     if sel in ("1", "all"):
-        print(f"  │  실험 1 (RPS 스윕):        {exp1_runs:2d}회 × {per_run}s = {t1}s  "
+        print(f"  │  실험 1 (RPS 스윕):        {exp1_runs:2d}회 × ({unit}) = {t1}s  "
               f"(~{t1//60}분 {t1%60:02d}초)")
     if sel in ("2", "all"):
-        print(f"  │  실험 2 (cancel 스윕):  최대 {exp2_runs:2d}회 × {per_run}s = {t2}s  "
+        print(f"  │  실험 2 (cancel 스윕):  최대 {exp2_runs:2d}회 × ({unit}) = {t2}s  "
               f"(~{t2//60}분 {t2%60:02d}초)")
     if sel in ("3", "all"):
-        print(f"  │  실험 3 (혼합 트래픽):     {exp3_runs:2d}회 × {per_run}s = {t3}s  "
+        print(f"  │  실험 3 (혼합 트래픽):     {exp3_runs:2d}회 × ({unit}) = {t3}s  "
               f"(~{t3//60}분 {t3%60:02d}초)")
     if sel == "all":
-        print(f"  │  전체 합계:          최대 {exp1_runs+exp2_runs+exp3_runs:2d}회 × {per_run}s "
-              f"= {total}s = {total//60}분 정확")
+        total_runs = exp1_runs + exp2_runs + exp3_runs
+        print(f"  │  전체 합계:          최대 {total_runs:2d}회  "
+              f"≈ {total}s (~{total//60}분 {total%60:02d}초)")
     print("  └────────────────────────────────────────────────")
 
 
@@ -426,6 +449,7 @@ def main():
 
     print("=" * 66)
     print("  🚀 HTTP/2 Rapid Reset Orchestrator v2")
+    sync_attacker_script()
     print(f"     실험 선택: {sel}  |  duration={EXPERIMENT_DURATION}s  "
           f"cooldown={COOLDOWN_BETWEEN_EXPERIMENTS}s")
     print(f"     IPS: 비활성화  |  CPU 임계치: {CPU_THRESHOLD}%")

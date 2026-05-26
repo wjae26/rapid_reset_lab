@@ -1,5 +1,5 @@
 experiment,rps,cancel_rate,duration_sec,ids_alert,ips_blocked,victim_cpu_avg,victim_cpu_max,cpu_threshold_exceeded,timestamp
-1,10,1.0,15,False,False,0.41,2.9,False,2026-05-26T16:09:14
-1,50,1.0,15,False,False,0.71,4.6,False,2026-05-26T16:09:47
-1,100,1.0,15,False,False,0.41,2.0,False,2026-05-26T16:10:20
-1,200,1.0,15,False,False,0.64,4.3,False,2026-05-26T16:10:53
+1,50,1.0,15,True,False,46.89,60.2,False,2026-05-26T16:32:45
+1,150,1.0,15,True,False,52.64,62.3,False,2026-05-26T16:33:18
+1,250,1.0,15,True,False,54.64,64.5,False,2026-05-26T16:33:51
+1,300,1.0,15,True,False,55.34,65.0,False,2026-05-26T16:34:24
