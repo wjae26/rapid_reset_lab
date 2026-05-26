@@ -1,0 +1,7 @@
+experiment,cancel_rate,rps,client_active,duration_sec,ids_alert,ips_blocked,victim_cpu_avg,victim_cpu_max,cpu_threshold_exceeded,timestamp
+3,0.5,50,True,15,False,False,0.71,3.4,False,2026-05-26T16:14:47
+3,0.6,50,True,15,False,False,0.6,2.4,False,2026-05-26T16:15:22
+3,0.7,50,True,15,False,False,1.19,5.5,False,2026-05-26T16:15:57
+3,0.8,50,True,15,False,False,0.63,2.5,False,2026-05-26T16:16:32
+3,0.9,50,True,15,False,False,0.73,2.1,False,2026-05-26T16:17:07
+3,1.0,50,True,15,False,False,0.68,2.6,False,2026-05-26T16:17:43

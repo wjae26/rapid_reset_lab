@@ -1,35 +1,52 @@
-# ── Experiment sweep ──────────────────────────────────────────────────────────
-CANCEL_RATE_RANGE   = (0.5, 1.0)   # (min, max) inclusive
-CANCEL_RATE_STEP    = 0.1
-EXPERIMENT_DURATION = 20           # seconds per single run  (was 30)
-COOLDOWN_BETWEEN_EXPERIMENTS = 15  # seconds between runs    (was 30)
+# ── Experiment selection ───────────────────────────────────────────────────────
+# "1", "2", "3", or "all"
+EXPERIMENT_SELECT = "all"
+
+# ── Timing ────────────────────────────────────────────────────────────────────
+EXPERIMENT_DURATION          = 15   # seconds per run
+COOLDOWN_BETWEEN_EXPERIMENTS = 10   # seconds between runs
+
+# ── Experiment 1: RPS sweep (cancel_rate=1.0 fixed) ───────────────────────────
+EXP1_RPS_VALUES  = [10, 50, 100, 200]
+EXP1_CANCEL_RATE = 1.0
+EXP1_CSV         = "./results/exp1_rps_sweep.csv"
+
+# ── Experiment 2: cancel_rate sweep (fixed RPS from exp1) ─────────────────────
+# Auto-detected from exp1 (CPU ≈ 50%). Set manually when running exp2 standalone.
+EXP2_RPS               = 100
+EXP2_CANCEL_RATE_RANGE = (0.5, 1.0)
+EXP2_CANCEL_RATE_STEP  = 0.1
+EXP2_CSV               = "./results/exp2_cancel_sweep.csv"
+
+# ── Experiment 3: mixed traffic (exp2 conditions + client_vm normal traffic) ───
+EXP3_CSV      = "./results/exp3_mixed.csv"
+CLIENT_SCRIPT = "client_normal_adjustable.py"
+
+# ── CPU target for RPS baseline detection (exp1 → exp2) ───────────────────────
+CPU_TARGET_FOR_EXP2 = 50.0   # percent
+
+# ── Binary search (exp2 phase 2) ──────────────────────────────────────────────
+BINARY_SEARCH_PRECISION         = 0.01
+BINARY_SEARCH_TRIALS            = 2
+BINARY_SEARCH_SUCCESS_THRESHOLD = 1
+BINARY_SEARCH_MAX_ITERATIONS    = 4
 
 # ── Detection ─────────────────────────────────────────────────────────────────
 IDS_ALERT_KEYWORD = "[ALERT]"
-
-# ── Victim CPU ────────────────────────────────────────────────────────────────
-# Must match CPU_THRESHOLD constant in victim_monitor.py
-CPU_THRESHOLD = 70.0               # percent
-
-# ── Phase-2 binary search (MODE A only) ───────────────────────────────────────
-BINARY_SEARCH_PRECISION        = 0.01
-BINARY_SEARCH_TRIALS           = 2    # was 3
-BINARY_SEARCH_SUCCESS_THRESHOLD = 1   # out of BINARY_SEARCH_TRIALS  (was 2)
+CPU_THRESHOLD     = 70.0    # percent; must match victim_monitor.py
 
 # ── Container names ───────────────────────────────────────────────────────────
-ATTACKER_SCRIPT     = "attacker_multi.py"   # switch to attacker_single.py for single-thread
-ATTACKER_CONTAINER  = "attacker_vm_1"
-VICTIM_CONTAINER    = "victim"
-IDS_IPS_CONTAINER   = "ids_ips_vm"
+ATTACKER_SCRIPT    = "attacker_multi.py"
+ATTACKER_CONTAINER = "attacker_vm_1"
+CLIENT_CONTAINER   = "client_vm"
+VICTIM_CONTAINER   = "victim"
+IDS_IPS_CONTAINER  = "ids_ips_vm"
 
 # ── Result paths (host-side) ──────────────────────────────────────────────────
 RESULTS_DIR              = "./results"
-EXPERIMENT_LOG           = "./results/experiment_log.csv"
 VICTIM_METRICS_FILE_HOST = "./results/victim_metrics.json"
 
 # ── Container-side IDS log paths ──────────────────────────────────────────────
-# Phase 1 dual: A and B write to separate files (same tshark traffic)
-# Phase 2: MODE A only, writes to IDS_LOG_A
 IDS_LOG_A = "/root/ids_a.log"
 IDS_LOG_B = "/root/ids_b.log"
 
@@ -37,10 +54,32 @@ IDS_LOG_B = "/root/ids_b.log"
 TSHARK_IFACE = "eth0"
 VICTIM_IP    = "192.168.20.10"
 
-# ── CSV schema ────────────────────────────────────────────────────────────────
+# ── CSV schemas ───────────────────────────────────────────────────────────────
+EXP1_COLUMNS = [
+    "experiment", "rps", "cancel_rate", "duration_sec",
+    "ids_alert", "ips_blocked",
+    "victim_cpu_avg", "victim_cpu_max", "cpu_threshold_exceeded",
+    "timestamp",
+]
+EXP2_COLUMNS = [
+    "experiment", "phase", "trial", "cancel_rate", "rps", "duration_sec",
+    "ids_alert", "ips_blocked",
+    "victim_cpu_avg", "victim_cpu_max", "cpu_threshold_exceeded",
+    "timestamp",
+]
+EXP3_COLUMNS = [
+    "experiment", "cancel_rate", "rps", "client_active", "duration_sec",
+    "ids_alert", "ips_blocked",
+    "victim_cpu_avg", "victim_cpu_max", "cpu_threshold_exceeded",
+    "timestamp",
+]
+
+# ── Legacy aliases (report.py compatibility) ───────────────────────────────────
+EXPERIMENT_LOG    = "./results/experiment_log.csv"
+CANCEL_RATE_RANGE = EXP2_CANCEL_RATE_RANGE
+CANCEL_RATE_STEP  = EXP2_CANCEL_RATE_STEP
 CSV_COLUMNS = [
-    "phase", "trial",
-    "cancel_rate", "mode", "duration_sec",
+    "phase", "trial", "cancel_rate", "mode", "duration_sec",
     "ids_alert", "ips_blocked",
     "victim_cpu_avg", "victim_cpu_max", "cpu_threshold_exceeded",
     "timestamp",
